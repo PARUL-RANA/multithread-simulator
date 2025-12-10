@@ -309,6 +309,9 @@ class FullSimulatorC:
         left = 80
         for name, events in self.timeline_data.items():
             y = self.track_positions.get(name, 6)
+            # subtle background stripe for each thread timeline row
+            self.timeline_canvas.create_rectangle(0, y, 1200, y+14, fill="#101418", outline="", tags="ev_bg")
+
             evs = events[-40:]
             x = left
             for ev, ts in evs:
