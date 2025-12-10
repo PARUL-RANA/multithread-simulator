@@ -455,13 +455,15 @@ class FullSimulatorC:
     # Logging
     # -------------------------
     def log(self, tag, msg):
-        ts = time.strftime("%H:%M:%S")
+        ts = time.strftime("%Y-%m-%d %H:%M:%S")
         icon = {"P":"🟦","C":"🟥","S":"ℹ️","W":"⚠️"}.get(tag, "•")
+        full_msg = f"[{ts}] ({tag}) {msg}"
         try:
-            self.logbox.insert(tk.END, f"[{ts}] {icon} {msg}\n", tag)
+            self.logbox.insert(tk.END, f"{full_msg}\n", tag)
+            
             self.logbox.see(tk.END)
         except:
-            self.logbox.insert(tk.END, f"[{ts}] {msg}\n")
+            self.logbox.insert(tk.END, f"{full_msg}\n")
             self.logbox.see(tk.END)
 
     def clear_log(self):
