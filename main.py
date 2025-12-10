@@ -74,6 +74,15 @@ class MonitorBuffer:
             return item
 
 class SemaphoreBuffer:
+    """Bounded buffer implemented using counting semaphores.
+
+    Uses:
+    - empty: counts free slots in the buffer
+    - full:  counts filled slots in the buffer
+    - mutex: gives mutual exclusion while accessing the queue
+
+    This shows the Producer–Consumer solution using semaphores.
+    """
     def __init__(self, capacity):
         self.capacity = capacity
         self.q = []
