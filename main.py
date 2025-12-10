@@ -43,6 +43,11 @@ NEON = {
 # Synchronization Models
 # -------------------------
 class MonitorBuffer:
+        """Bounded buffer implemented using monitor-style locking and conditions.
+
+    Producers block when the buffer is full, and consumers block when it is empty.
+    This models the classic Producer–Consumer problem using monitors (thread-safe).
+    """
     def __init__(self, capacity):
         self.capacity = capacity
         self.q = []
