@@ -350,9 +350,17 @@ class FullSimulatorC:
     # Start / Stop / Reset
     # -------------------------
     def start(self):
-        if self.running:
-            return
+    if self.running:
+        # Inform the user if they click start again
+        self.log("S", "Simulation is already running")
+        return
+
         self.running = True
+                try:
+            self.start_btn.configure(state="disabled")
+        except:
+            pass
+
         self.stop_event.clear()
         self.clear_log()
         self.log("S", "Simulation started")
@@ -375,8 +383,14 @@ class FullSimulatorC:
     def stop(self):
         if not self.running:
             return
+            
         self.stop_event.set()
         self.running = False
+                try:
+            self.start_btn.configure(state="normal")
+        except:
+            pass
+
         self.log("S", "Stopping simulation...")
         self.check_finished()
 
@@ -391,6 +405,11 @@ class FullSimulatorC:
         self.consumed_count = 0
         self.peak_buffer = 0
         self.update_counts()
+                try:
+            self.start_btn.configure(state="normal")
+        except:
+            pass
+
 
     # -------------------------
     # Producer / Consumer Workers
