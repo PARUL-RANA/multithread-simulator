@@ -454,10 +454,12 @@ class FullSimulatorC:
     # -------------------------
     # Logging
     # -------------------------
-    def log(self, tag, msg):
-        ts = time.strftime("%Y-%m-%d %H:%M:%S")
-        icon = {"P":"🟦","C":"🟥","S":"ℹ️","W":"⚠️"}.get(tag, "•")
-        full_msg = f"[{ts}] ({tag}) {msg}"
+def log(self, tag, msg):
+    # Shorter time + visible icon for each log type
+    ts = time.strftime("%H:%M:%S")
+    icon = {"P": "🟦", "C": "🟥", "S": "ℹ️", "W": "⚠️"}.get(tag, "•")
+    full_msg = f"{icon} [{ts}] {msg}"
+
         try:
             self.logbox.insert(tk.END, f"{full_msg}\n", tag)
             
