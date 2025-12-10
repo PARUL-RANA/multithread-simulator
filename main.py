@@ -220,8 +220,15 @@ class FullSimulatorC:
         card = tk.Frame(self.root, bg=NEON["panel"])
         card.place(x=10, y=82, width=760, height=480)
 
-        self.canvas = tk.Canvas(card, bg=NEON["bg"], highlightthickness=0)
-        self.canvas.place(x=8, y=8, width=744, height=464)
+                # Show current buffer usage under the canvas
+        self.buffer_label = tk.Label(
+            card,
+            text=f"Buffer: 0 / {self.capacity}",
+            bg=NEON["panel"],
+            fg=NEON["text"],
+            font=("Segoe UI", 9)
+        )
+        self.buffer_label.place(x=10, y=445)
 
         self.prod_pos = (120, 240)
         self.cons_pos = (620, 240)
@@ -496,18 +503,26 @@ def log(self, tag, msg):
     # Slot updates (ONLY color changes)
     # -------------------------
     def update_slots(self, n):
-        for i in range(self.capacity):
-            rect, l, r = self.slot_rects[i]
-            if i < n:
-                color = NEON["slot_fill"]
-            else:
-                color = NEON["slot_empty"]
-            try:
-                self.canvas.itemconfig(rect, fill=color)
-                self.canvas.itemconfig(l, fill=color)
-                self.canvas.itemconfig(r, fill=color)
-            except:
-                pass
+    for i in range(self.capacity):
+        rect, l, r = self.slot_rects[i]
+        if i < n:
+            color = NEON["slot_fill"]
+        else:
+            color = NEON["slot_empty"]
+        try:
+            self.canvas.itemconfig(rect, fill=color)
+            self.canvas.itemconfig(l, fill=color)
+            self.canvas.itemconfig(r, fill=color)
+        except:
+            pass
+
+    # Update buffer usage label
+    try:
+        if hasattr(self, "buffer_label"):
+            self.buffer_label.configure(text=f"Buffer: {n} / {self.capacity}")
+    except:
+        pass
+
 
     # -------------------------
     # Thread UI & timeline
