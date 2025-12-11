@@ -43,6 +43,11 @@ NEON = {
 # Synchronization Models
 # -------------------------
 class MonitorBuffer:
+        """Bounded buffer implemented using monitor-style locking and conditions.
+
+    Producers block when the buffer is full, and consumers block when it is empty.
+    This models the classic Producer–Consumer problem using monitors (thread-safe).
+    """
     def __init__(self, capacity):
         self.capacity = capacity
         self.q = []
@@ -69,6 +74,15 @@ class MonitorBuffer:
             return item
 
 class SemaphoreBuffer:
+    """Bounded buffer implemented using counting semaphores.
+
+    Uses:
+    - empty: counts free slots in the buffer
+    - full:  counts filled slots in the buffer
+    - mutex: gives mutual exclusion while accessing the queue
+
+    This shows the Producer–Consumer solution using semaphores.
+    """
     def __init__(self, capacity):
         self.capacity = capacity
         self.q = []
@@ -206,8 +220,15 @@ class FullSimulatorC:
         card = tk.Frame(self.root, bg=NEON["panel"])
         card.place(x=10, y=82, width=760, height=480)
 
-        self.canvas = tk.Canvas(card, bg=NEON["bg"], highlightthickness=0)
-        self.canvas.place(x=8, y=8, width=744, height=464)
+                # Show current buffer usage under the canvas
+        self.buffer_label = tk.Label(
+            card,
+            text=f"Buffer: 0 / {self.capacity}",
+            bg=NEON["panel"],
+            fg=NEON["text"],
+            font=("Segoe UI", 9)
+        )
+        self.buffer_label.place(x=10, y=445)
 
         self.prod_pos = (120, 240)
         self.cons_pos = (620, 240)
@@ -332,9 +353,17 @@ class FullSimulatorC:
     # Start / Stop / Reset
     # -------------------------
     def start(self):
-        if self.running:
-            return
+    if self.running:
+        # Inform the user if they click start again
+        self.log("S", "Simulation is already running")
+        return
+
         self.running = True
+                try:
+            self.start_btn.configure(state="disabled")
+        except:
+            pass
+
         self.stop_event.clear()
         self.clear_log()
         self.log("S", "Simulation started")
@@ -364,8 +393,14 @@ class FullSimulatorC:
     def stop(self):
         if not self.running:
             return
+            
         self.stop_event.set()
         self.running = False
+                try:
+            self.start_btn.configure(state="normal")
+        except:
+            pass
+
         self.log("S", "Stopping simulation...")
         self.check_finished()
 
@@ -380,6 +415,11 @@ class FullSimulatorC:
         self.consumed_count = 0
         self.peak_buffer = 0
         self.update_counts()
+                try:
+            self.start_btn.configure(state="normal")
+        except:
+            pass
+
 
     # -------------------------
     # Producer / Consumer Workers
@@ -464,10 +504,12 @@ class FullSimulatorC:
     # -------------------------
     # Logging
     # -------------------------
-    def log(self, tag, msg):
-        ts = time.strftime("%Y-%m-%d %H:%M:%S")
-        icon = {"P":"🟦","C":"🟥","S":"ℹ️","W":"⚠️"}.get(tag, "•")
-        full_msg = f"[{ts}] ({tag}) {msg}"
+def log(self, tag, msg):
+    # Shorter time + visible icon for each log type
+    ts = time.strftime("%H:%M:%S")
+    icon = {"P": "🟦", "C": "🟥", "S": "ℹ️", "W": "⚠️"}.get(tag, "•")
+    full_msg = f"{icon} [{ts}] {msg}"
+
         try:
             self.logbox.insert(tk.END, f"{full_msg}\n", tag)
             
@@ -490,18 +532,26 @@ class FullSimulatorC:
     # Slot updates (ONLY color changes)
     # -------------------------
     def update_slots(self, n):
-        for i in range(self.capacity):
-            rect, l, r = self.slot_rects[i]
-            if i < n:
-                color = NEON["slot_fill"]
-            else:
-                color = NEON["slot_empty"]
-            try:
-                self.canvas.itemconfig(rect, fill=color)
-                self.canvas.itemconfig(l, fill=color)
-                self.canvas.itemconfig(r, fill=color)
-            except:
-                pass
+    for i in range(self.capacity):
+        rect, l, r = self.slot_rects[i]
+        if i < n:
+            color = NEON["slot_fill"]
+        else:
+            color = NEON["slot_empty"]
+        try:
+            self.canvas.itemconfig(rect, fill=color)
+            self.canvas.itemconfig(l, fill=color)
+            self.canvas.itemconfig(r, fill=color)
+        except:
+            pass
+
+    # Update buffer usage label
+    try:
+        if hasattr(self, "buffer_label"):
+            self.buffer_label.configure(text=f"Buffer: {n} / {self.capacity}")
+    except:
+        pass
+
 
     # -------------------------
     # Thread UI & timeline
