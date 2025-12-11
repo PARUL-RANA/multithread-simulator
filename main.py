@@ -340,6 +340,13 @@ class FullSimulatorC:
         self.log("S", "Simulation started")
 
         mode = self.mode_var.get()
+        if mode == "Semaphore":
+            self.log("S", "Semaphore mode activated")
+        try:
+            self.status_badge.configure(text="Mode: Semaphore", bg="#57a6ff")
+        except:
+            pass
+
         self.buffer_model = MonitorBuffer(self.capacity) if mode == "Monitor" else SemaphoreBuffer(self.capacity)
 
         self.setup_thread_ui()
